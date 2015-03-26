@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html ng-app="App">
+    <head></head>
+    <body ng-controller="AppCtrl">
+
+        Search
+        <search-filter
+            collection=""
+            filters="filters">
+
+            <table>
+                <tr ng-repeat="row in rows">
+                    <td>{{row.data}}</td>
+                </tr>
+            </table>
+        </search-filter>
+    </body>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.2/underscore-min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.15/angular.js"></script>
+    <script type="text/javascript" src="search-filter/ng-search-filter.js"></script>
+    <script type="text/javascript" src="app.js"></script>
+</html>
