@@ -8,23 +8,29 @@ app.controller('AppCtrl', ['$scope', function($scope){
     $scope.filters = [
         {
             id: 0,
-            category: 'Status',
-            field: 'status',
-            object: 'status',
+            category: 'Milk Type',
+            field: 'milkType',
+            object: 'self',
             values: [
                 {name: 'All', isActive: true, isAll: true, fieldEval: '', count: 0},
-                {name: 'Rejected', isActive: false, isAll: false, fieldEval: 'REJECTED', count: 0},
-                {name: 'Open', isActive: false, isAll: false, fieldEval: 'OPEN', count: 0},
-                {name: 'In Progress', isActive: false, isAll: false, fieldEval: 'IN PROGRESS', count: 0},
-                {name: 'Submitted', isActive: false, isAll: false, fieldEval: 'SUBMITTED', count: 0},
-                {name: 'Completed', isActive: false, isAll: false, fieldEval: 'COMPLETED', count: 0}
+                {name: 'Cow', isActive: false, isAll: false, fieldEval: 'Cow', count: 0},
+                {name: 'Goat', isActive: false, isAll: false, fieldEval: 'Goat', count: 0},
+                {name: 'Sheep', isActive: false, isAll: false, fieldEval: 'Sheep', count: 0}
             ],
             hasIcon: false
         }
     ];
 
-    $scope.rows = [
-        { data: 'Example 1'},
-        { data: 'Example 2'}
+    $scope.cheeseList = [
+        { name: 'Brie de Meaux', milkType: 'Cow', region: 'Ile-de-France'},
+        { name: 'Bleu d\'Auvergne', milkType: 'Cow', region: 'Auvergne'},
+        { name: 'Camembert', milkType: 'Cow', region: 'Normandy'},
+        { name: 'Mâconnais', milkType: 'Goat', region: 'Burgundy'},
+        { name: 'Pont-l\'Évêque', milkType: 'Cow', region: 'Normandy'},
+        { name: 'Picodon', milkType: 'Goat', region: 'Rhône-Alpes'},
+        { name: 'Rocamadour', milkType: 'Goat', region: 'Midi-Pyrénées'},
+        { name: 'Roquefort', milkType: 'Sheep', region: 'Midi-Pyrénées'},
+        { name: 'Saint Nectaire', milkType: 'Cow', region: 'Auvergne'},
+        { name: 'Salers', milkType: 'Cow', region: 'Auvergne'}
     ];
 }]);

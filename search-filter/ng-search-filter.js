@@ -10,17 +10,32 @@ ngSearchFilter.directive('searchFilter', function(){
         templateUrl: 'search-filter/filter.html',
         transclude: true,
         scope: {
-            collection: '=searchFilter',
-            filters: '='
+            collection: '=',
+            filters: '=',
+            collectionType: '@'
         },
         controller: 'SearchFilterCtrl'
     };
 });
 
-ngSearchFilter.controller('SearchFilterCtrl', ['$scope',
-    function($scope){
+ngSearchFilter.controller('SearchFilterCtrl', ['$scope','$filter',
+    function($scope, $filter){
         $scope.searchTitle = '';
         $scope.isActiveSearch = false;
+        $scope.collectionFields = [];
+
+        $scope.$watch('collection', function(newCollection){
+            $scope.collectionFields = $scope.getFields(angular.copy(newCollection));
+            $scope.countFilters();
+        });
+
+        $scope.getFields = function(collection){
+            return _.keys(angular.copy(collection[0]));
+        };
+
+        $scope.getValues = function(item){
+            return _.values(angular.copy(item));
+        };
 
         $scope.toggleFilter = function(filter, value){
             var general = _.findWhere(filter.values, { isAll: true});
@@ -60,30 +75,40 @@ ngSearchFilter.controller('SearchFilterCtrl', ['$scope',
         $scope.countFilters = function(){
             _.each($scope.filters, function(filter){
                 _.each(filter.values, function(value){
-                    value.count = $scope.countFilter(filter, value);
+                    value.count = $scope.countFilter($scope.collection, filter, value);
                 });
             });
         };
 
         $scope.countFilter = function(filter, value){
-            var filters = [];
-            var values = [];
-            var valueToCount = angular.copy(value);
-            var filterToCount = angular.copy(filter);
+            console.log(filter);
+            var filters = [],
+                values = [],
+                valueToCount = angular.copy(value),
+                filterToCount = angular.copy(filter);
+
             valueToCount.isActive = true;
 
             values.push(valueToCount);
             _.extend(filterToCount, { values: values });
             filters.push(filterToCount);
-            return $filter('TitleFilter')($scope.titles, filters, filter.category).length;
+
+            return $filter('KeywordSearchFilter')($scope.collection, filters, filter.category).length;
         };
+
+        $scope.init = function(){
+            console.log($scope.collection);
+            $scope.collectionFields = $scope.getFields($scope.collection);
+        };
+
+        $scope.init();
     }]);
 
 ngSearchFilter.filter('KeywordSearchFilter', function(){
     return function(collection, filters, category){
-        var filteredCollection = [];
-        var filter = _.findWhere(filters, { category: category});
-        var general = _.findWhere(filter.values, { isAll: true });
+        var filteredCollection = [],
+            filter = _.findWhere(filters, { category: category}),
+            general = _.findWhere(filter.values, { isAll: true });
 
         collection = _.filter(collection, function(item) {
             return item.hierarchy !== 'SEASON' && item.hierarchy !== 'EPISODE' && item.id !== "0";

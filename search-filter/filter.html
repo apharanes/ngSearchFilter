@@ -1,21 +1,19 @@
 <div class="search-filter row">
     <div class="input-group">
-        <input type="text" class="form-control" placeholder="Search By Title Or Content Provider" ng-model="searchTitle"/>
-        <div class="input-group-btn">
-            <button class="btn btn-default clear-filter" type="reset" ng-click="clearFilters()">Clear Filters</button>
-        </div>
+        <input type="text" placeholder="Search By Title Or Content Provider" ng-model="searchTitle" class="search"/>
+        <button class="btn btn-default clear-filter" type="reset" ng-click="clearFilters()">Clear Filters</button>
     </div>
     <div class="filter">
         <div class="input-group">
             <div class="{{'col-sm-' + 12 / filters.length}}" ng-repeat="filter in filters">
                 <div class="form-group filter-group">
-                    <label class="control-label">
+                    <label>
                         <span class="glyphicon" ng-class="{'Type':'glyphicon-film', 'License Window':'glyphicon-calendar', 'Available Regions':'glyphicon-globe'}[filter.category]"></span>
                         {{filter.category}}:</label>
                     <div class="input-group">
                         <button
-                                class="filter btn btn-xs" ng-repeat="value in filter.values"
-                                ng-class="{ true: 'btn-warning', false : 'btn-default' }[value.isActive]"
+                                class="filter button" ng-repeat="value in filter.values"
+                                ng-class="{ true: 'selected'}[value.isActive]"
                                 ng-click="toggleFilter(filter, value)">
                             <img ng-if="filter.hasIcon && !value.isAll" ng-src="{{filter.iconDirectory + '/' + value.name + '.png'}}"/>
                             {{value.name}} <span class="badge">{{ value.count }}</span>
@@ -26,5 +24,16 @@
         </div>
     </div>
 
-    <div ng-transclude />
+    <hr />
+
+    <table>
+        <thead>
+        <th ng-repeat="field in collectionFields">{{field}}</th>
+        </thead>
+        <tbody>
+        <tr ng-repeat="item in collection | KeywordSearchFilter : filters : 'Milk Type' ">
+            <td ng-repeat="value in getValues(item)">{{value}}</td>
+        </tr>
+        </tbody>
+    </table>
 </div>
