@@ -1,6 +1,6 @@
 <div class="search-filter row">
     <div class="input-group">
-        <input type="text" placeholder="Search By Title Or Content Provider" ng-model="searchTitle" class="search"/>
+        <input type="text" placeholder="Search By Title Or Content Provider" ng-model="searchKeyword" class="search"/>
         <button class="btn btn-default clear-filter" type="reset" ng-click="clearFilters()">Clear Filters</button>
     </div>
     <div class="filter">
@@ -31,7 +31,7 @@
         <th ng-repeat="field in collectionFields">{{field}}</th>
         </thead>
         <tbody>
-        <tr ng-repeat="item in collection | KeywordSearchFilter : filters : 'Milk Type' ">
+        <tr ng-repeat="item in collection | FilterByCategory : filters : 'Milk Type' | KeywordSearchFilter : ['name','region'] : searchKeyword">
             <td ng-repeat="value in getValues(item)">{{value}}</td>
         </tr>
         </tbody>

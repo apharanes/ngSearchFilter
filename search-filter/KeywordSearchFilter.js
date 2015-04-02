@@ -2,7 +2,7 @@
  * Created by jeanella on 3/19/2015.
  */
 
-ngSearchFilter.filter('KeywordSearchFilter', function(){
+ngSearchFilter.filter('FilterByCategory', function(){
     return function(collection, filters, category){
         var filteredCollection = [];
         var filter = _.findWhere(filters, { category: category});

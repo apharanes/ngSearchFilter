@@ -20,7 +20,7 @@ ngSearchFilter.directive('searchFilter', function(){
 
 ngSearchFilter.controller('SearchFilterCtrl', ['$scope','$filter',
     function($scope, $filter){
-        $scope.searchTitle = '';
+        $scope.searchKeyword = '';
         $scope.isActiveSearch = false;
         $scope.collectionFields = [];
 
@@ -62,7 +62,7 @@ ngSearchFilter.controller('SearchFilterCtrl', ['$scope','$filter',
         };
 
         $scope.clearFilters = function(){
-            $scope.searchTitle = '';
+            $scope.searchKeyword = '';
 
             _.each($scope.filters, function(filter){
                 _.each(filter.values, function(value){
@@ -104,15 +104,11 @@ ngSearchFilter.controller('SearchFilterCtrl', ['$scope','$filter',
         $scope.init();
     }]);
 
-ngSearchFilter.filter('KeywordSearchFilter', function(){
+ngSearchFilter.filter('FilterByCategory', function(){
     return function(collection, filters, category){
         var filteredCollection = [],
             filter = _.findWhere(filters, { category: category}),
             general = _.findWhere(filter.values, { isAll: true });
-
-        collection = _.filter(collection, function(item) {
-            return item.hierarchy !== 'SEASON' && item.hierarchy !== 'EPISODE' && item.id !== "0";
-        });
 
         if(!_.isUndefined(general)){
             if(general.isActive){
@@ -147,4 +143,38 @@ ngSearchFilter.filter('KeywordSearchFilter', function(){
         }
         return filteredCollection;
     };
+});
+
+ngSearchFilter.filter('KeywordSearchFilter', function(){
+    return function(collection, fields, keywords){
+        if(keywords.length > 0){
+            // Lowercased to search without case-sensitivity
+
+            keywords = keywords.toLowerCase();
+            var keywordSearch = keywords.split(' ');
+
+            return _.filter(collection, function(item){
+                var searched = "";
+
+                _.each(fields, function(field){
+                    searched = searched.concat(" ",item[field]);
+                });
+
+                // Lowercased to search without case-sensitivity
+                searched = searched.toLowerCase();
+
+                for(var i=0; i<keywordSearch.length; i++){
+                    if(searched.indexOf(keywordSearch[i]) == -1){
+                        // at least one of the keywords don't appear in the searchInput
+                        return false;
+                    }
+                }
+
+                // all keywords exist in the searchInput
+                return true;
+            });
+        }else{
+            return collection;
+        }
+    }
 });
