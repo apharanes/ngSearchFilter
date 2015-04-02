@@ -4,22 +4,22 @@
 
 var ngSearchFilter = angular.module('ngSearchFilter', []);
 
-ngSearchFilter.directive('searchFilter', function(){
-    return {
-        restrict: 'E',
-        templateUrl: 'search-filter/filter.html',
-        transclude: true,
-        scope: {
-            collection: '=',
-            filters: '=',
-            collectionType: '@'
-        },
-        controller: 'SearchFilterCtrl'
-    };
-});
+angular.module('ngSearchFilter')
+    .directive('searchFilter', function(){
+        return {
+            restrict: 'E',
+            templateUrl: 'search-filter/filter.html',
+            transclude: true,
+            scope: {
+                collection: '=',
+                filters: '=',
+                collectionType: '@'
+            },
+            controller: 'SearchFilterCtrl'
+        };
+    })
 
-ngSearchFilter.controller('SearchFilterCtrl', ['$scope','$filter',
-    function($scope, $filter){
+    .controller('SearchFilterCtrl', ['$scope','$filter', function($scope, $filter){
         $scope.searchKeyword = '';
         $scope.isActiveSearch = false;
         $scope.collectionFields = [];
@@ -95,81 +95,79 @@ ngSearchFilter.controller('SearchFilterCtrl', ['$scope','$filter',
 
             return $filter('FilterByCategory')(collection, filters, filter.category).length;
         };
+    }])
 
-        $scope.init();
-    }]);
+    .filter('FilterByCategory', function(){
+        return function(collection, filters, category){
+            var filteredCollection = [],
+                filter = _.findWhere(filters, { category: category}),
+                general = _.findWhere(filter.values, { isAll: true });
 
-ngSearchFilter.filter('FilterByCategory', function(){
-    return function(collection, filters, category){
-        var filteredCollection = [],
-            filter = _.findWhere(filters, { category: category}),
-            general = _.findWhere(filter.values, { isAll: true });
-
-        if(!_.isUndefined(general)){
-            if(general.isActive){
-                filteredCollection = collection;
+            if(!_.isUndefined(general)){
+                if(general.isActive){
+                    filteredCollection = collection;
+                }
             }
-        }
 
-        var others = _.findWhere(filter.values, { isAll: false });
-        if(!_.isUndefined(others)) {
-            _.each(_.where(filter.values, { isActive: true, isAll: false }), function (value) {
-                _.each(collection, function (item) {
-                    if(_.isArray(item[filter.object])){
-                        if(filter.which == 'collection'){
-                            _.each(item[filter.object], function(objectItem){
+            var others = _.findWhere(filter.values, { isAll: false });
+            if(!_.isUndefined(others)) {
+                _.each(_.where(filter.values, { isActive: true, isAll: false }), function (value) {
+                    _.each(collection, function (item) {
+                        if(_.isArray(item[filter.object])){
+                            if(filter.which == 'collection'){
+                                _.each(item[filter.object], function(objectItem){
 
-                                if(_.isEqual(objectItem[filter.field].trim(),value.fieldEval.trim()) && !_.contains(filteredCollection, item)){
+                                    if(_.isEqual(objectItem[filter.field].trim(),value.fieldEval.trim()) && !_.contains(filteredCollection, item)){
+                                        filteredCollection.push(item);
+                                    }
+                                });
+                            } else {
+                                if(_.isEqual(item[filter.object][filter.which][filter.field].trim(),value.fieldEval.trim()) && !_.contains(filteredCollection, item)){
                                     filteredCollection.push(item);
                                 }
-                            });
+                            }
                         } else {
-                            if(_.isEqual(item[filter.object][filter.which][filter.field].trim(),value.fieldEval.trim()) && !_.contains(filteredCollection, item)){
+                            if(_.isEqual(item[filter.field],value.fieldEval)){
                                 filteredCollection.push(item);
                             }
                         }
-                    } else {
-                        if(_.isEqual(item[filter.field],value.fieldEval)){
-                            filteredCollection.push(item);
+                    });
+                });
+            }
+            return filteredCollection;
+        };
+    })
+
+    .filter('KeywordSearchFilter', function(){
+        return function(collection, fields, keywords){
+            if(keywords.length > 0){
+                // Lowercased to search without case-sensitivity
+
+                keywords = keywords.toLowerCase();
+                var keywordSearch = keywords.split(' ');
+
+                return _.filter(collection, function(item){
+                    var searched = "";
+
+                    _.each(fields, function(field){
+                        searched = searched.concat(" ",item[field]);
+                    });
+
+                    // Lowercased to search without case-sensitivity
+                    searched = searched.toLowerCase();
+
+                    for(var i=0; i<keywordSearch.length; i++){
+                        if(searched.indexOf(keywordSearch[i]) == -1){
+                            // at least one of the keywords don't appear in the searchInput
+                            return false;
                         }
                     }
+
+                    // all keywords exist in the searchInput
+                    return true;
                 });
-            });
+            }else{
+                return collection;
+            }
         }
-        return filteredCollection;
-    };
-});
-
-ngSearchFilter.filter('KeywordSearchFilter', function(){
-    return function(collection, fields, keywords){
-        if(keywords.length > 0){
-            // Lowercased to search without case-sensitivity
-
-            keywords = keywords.toLowerCase();
-            var keywordSearch = keywords.split(' ');
-
-            return _.filter(collection, function(item){
-                var searched = "";
-
-                _.each(fields, function(field){
-                    searched = searched.concat(" ",item[field]);
-                });
-
-                // Lowercased to search without case-sensitivity
-                searched = searched.toLowerCase();
-
-                for(var i=0; i<keywordSearch.length; i++){
-                    if(searched.indexOf(keywordSearch[i]) == -1){
-                        // at least one of the keywords don't appear in the searchInput
-                        return false;
-                    }
-                }
-
-                // all keywords exist in the searchInput
-                return true;
-            });
-        }else{
-            return collection;
-        }
-    }
-});
+    });
