@@ -30,7 +30,7 @@ app.controller('AppCtrl', ['$scope', function($scope){
         { name: 'Picodon', milkType: 'Goat', region: 'Rhône-Alpes'},
         { name: 'Rocamadour', milkType: 'Goat', region: 'Midi-Pyrénées'},
         { name: 'Roquefort', milkType: 'Sheep', region: 'Midi-Pyrénées'},
-        { name: 'Saint Nectaire', milkType: 'Cow', region: 'Auvergne'},
+        { name: 'Saint-Nectaire', milkType: 'Cow', region: 'Auvergne'},
         { name: 'Salers', milkType: 'Cow', region: 'Auvergne'}
     ];
 }]);
