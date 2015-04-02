@@ -5,6 +5,11 @@
 var ngSearchFilter = angular.module('ngSearchFilter', []);
 
 angular.module('ngSearchFilter')
+
+/** parameters as attributes
+ * - collection: The collection to be filtered
+ * - filters: An array of filters that will be used on the collection
+ */
     .directive('searchFilter', function(){
         return {
             restrict: 'E',
@@ -13,12 +18,17 @@ angular.module('ngSearchFilter')
             scope: {
                 collection: '=',
                 filters: '=',
-                collectionType: '@'
+                keywordFields: '='
             },
             controller: 'SearchFilterCtrl'
         };
     })
 
+/** scope variables passed from the directive attributes:
+ *  - collection
+ *  - filters
+ *  - keywordFields
+ */
     .controller('SearchFilterCtrl', ['$scope','$filter', function($scope, $filter){
         $scope.searchKeyword = '';
         $scope.isActiveSearch = false;
@@ -29,14 +39,17 @@ angular.module('ngSearchFilter')
             $scope.countFilters($scope.collection);
         });
 
+        // Fetch fields of a collection item to be used as html Table column headers
         $scope.getFields = function(collection){
             return _.keys(angular.copy(collection[0]));
         };
 
+        // This function is called when iterating through the html Table rows
         $scope.getValues = function(item){
             return _.values(angular.copy(item));
         };
 
+        // Selects multiple filters
         $scope.toggleFilter = function(filter, value){
             var general = _.findWhere(filter.values, { isAll: true});
 
@@ -61,6 +74,7 @@ angular.module('ngSearchFilter')
             $scope.isActiveSearch = (!general.isActive || value.isActive) && !value.isAll;
         };
 
+        // Clears search and sets filters to default values (All)
         $scope.clearFilters = function(){
             $scope.searchKeyword = '';
 
@@ -72,43 +86,48 @@ angular.module('ngSearchFilter')
             $scope.isActiveSearch = false;
         };
 
+        // Called to initialize static total count for each filter in the UI
         $scope.countFilters = function(collection){
+
+            var countFilter = function(collection, filter, value){
+                console.log(filter);
+                var filters = [],
+                    values = [],
+                    valueToCount = angular.copy(value),
+                    filterToCount = angular.copy(filter);
+
+                valueToCount.isActive = true;
+
+                values.push(valueToCount);
+                _.extend(filterToCount, { values: values });
+                filters.push(filterToCount);
+
+                return $filter('FilterByCategory')(collection, filters, filter.category).length;
+            };
+
             _.each($scope.filters, function(filter){
                 _.each(filter.values, function(value){
-                    value.count = $scope.countFilter(collection, filter, value);
+                    value.count = countFilter(collection, filter, value);
                 });
             });
         };
-
-        $scope.countFilter = function(collection, filter, value){
-            console.log(filter);
-            var filters = [],
-                values = [],
-                valueToCount = angular.copy(value),
-                filterToCount = angular.copy(filter);
-
-            valueToCount.isActive = true;
-
-            values.push(valueToCount);
-            _.extend(filterToCount, { values: values });
-            filters.push(filterToCount);
-
-            return $filter('FilterByCategory')(collection, filters, filter.category).length;
-        };
     }])
 
+    // Enables to filter category by field or by a set of fields in an object
     .filter('FilterByCategory', function(){
         return function(collection, filters, category){
             var filteredCollection = [],
                 filter = _.findWhere(filters, { category: category}),
                 general = _.findWhere(filter.values, { isAll: true });
 
+            // Simply return original collection if 'isAll' filter is active
             if(!_.isUndefined(general)){
                 if(general.isActive){
                     filteredCollection = collection;
                 }
             }
 
+            // Iterate through each possible filters in the selected category
             var others = _.findWhere(filter.values, { isAll: false });
             if(!_.isUndefined(others)) {
                 _.each(_.where(filter.values, { isActive: true, isAll: false }), function (value) {
@@ -116,13 +135,12 @@ angular.module('ngSearchFilter')
                         if(_.isArray(item[filter.object])){
                             if(filter.which == 'collection'){
                                 _.each(item[filter.object], function(objectItem){
-
-                                    if(_.isEqual(objectItem[filter.field].trim(),value.fieldEval.trim()) && !_.contains(filteredCollection, item)){
+                                    if(_.isEqual(objectItem[filter.field],value.fieldEval) && !_.contains(filteredCollection, item)){
                                         filteredCollection.push(item);
                                     }
                                 });
                             } else {
-                                if(_.isEqual(item[filter.object][filter.which][filter.field].trim(),value.fieldEval.trim()) && !_.contains(filteredCollection, item)){
+                                if(_.isEqual(item[filter.object][filter.which][filter.field],value.fieldEval) && !_.contains(filteredCollection, item)){
                                     filteredCollection.push(item);
                                 }
                             }
@@ -138,11 +156,18 @@ angular.module('ngSearchFilter')
         };
     })
 
+/** Iterates through a set of fields of a collection to check for matches to the keyword
+ * @param {collection} - Collection to be searched through
+ * @param {fields} - Array of string fields of the collection item where you want to check keywords against
+ * @param {keyword} - Keyword to be searched in each field of each collection item
+ *
+ * @return {FilteredCollection}
+ */
     .filter('KeywordSearchFilter', function(){
         return function(collection, fields, keywords){
             if(keywords.length > 0){
-                // Lowercased to search without case-sensitivity
 
+                // Lowercased to search without case-sensitivity
                 keywords = keywords.toLowerCase();
                 var keywordSearch = keywords.split(' ');
 
@@ -158,14 +183,15 @@ angular.module('ngSearchFilter')
 
                     for(var i=0; i<keywordSearch.length; i++){
                         if(searched.indexOf(keywordSearch[i]) == -1){
-                            // at least one of the keywords don't appear in the searchInput
+                            // at least one of the keywords don't appear in the search input
                             return false;
                         }
                     }
 
-                    // all keywords exist in the searchInput
+                    // all keywords exist in the search input
                     return true;
                 });
+
             }else{
                 return collection;
             }
