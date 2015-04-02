@@ -31,7 +31,7 @@
         <th ng-repeat="field in collectionFields">{{field}}</th>
         </thead>
         <tbody>
-        <tr ng-repeat="item in collection | FilterByCategory : filters : 'Milk Type' | KeywordSearchFilter : ['name','region'] : searchKeyword">
+        <tr ng-repeat="item in collection | FilterByCategory : filters : 'Milk Type' | KeywordSearchFilter : keywordFields : searchKeyword">
             <td ng-repeat="value in getValues(item)">{{value}}</td>
         </tr>
         </tbody>

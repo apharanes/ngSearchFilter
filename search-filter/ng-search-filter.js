@@ -9,6 +9,7 @@ angular.module('ngSearchFilter')
 /** parameters as attributes
  * - collection: The collection to be filtered
  * - filters: An array of filters that will be used on the collection
+ * - keywordFields: fields of a collection item to check matches of the search keyword
  */
     .directive('searchFilter', function(){
         return {
