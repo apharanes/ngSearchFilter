@@ -26,7 +26,7 @@ ngSearchFilter.controller('SearchFilterCtrl', ['$scope','$filter',
 
         $scope.$watch('collection', function(newCollection){
             $scope.collectionFields = $scope.getFields(angular.copy(newCollection));
-            $scope.countFilters();
+            $scope.countFilters($scope.collection);
         });
 
         $scope.getFields = function(collection){
@@ -72,15 +72,15 @@ ngSearchFilter.controller('SearchFilterCtrl', ['$scope','$filter',
             $scope.isActiveSearch = false;
         };
 
-        $scope.countFilters = function(){
+        $scope.countFilters = function(collection){
             _.each($scope.filters, function(filter){
                 _.each(filter.values, function(value){
-                    value.count = $scope.countFilter($scope.collection, filter, value);
+                    value.count = $scope.countFilter(collection, filter, value);
                 });
             });
         };
 
-        $scope.countFilter = function(filter, value){
+        $scope.countFilter = function(collection, filter, value){
             console.log(filter);
             var filters = [],
                 values = [],
@@ -93,12 +93,7 @@ ngSearchFilter.controller('SearchFilterCtrl', ['$scope','$filter',
             _.extend(filterToCount, { values: values });
             filters.push(filterToCount);
 
-            return $filter('KeywordSearchFilter')($scope.collection, filters, filter.category).length;
-        };
-
-        $scope.init = function(){
-            console.log($scope.collection);
-            $scope.collectionFields = $scope.getFields($scope.collection);
+            return $filter('FilterByCategory')(collection, filters, filter.category).length;
         };
 
         $scope.init();
