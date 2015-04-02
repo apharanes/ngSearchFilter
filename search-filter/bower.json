@@ -1,0 +1,25 @@
+{
+  "name": "angular-search-filter",
+  "version": "0.0.1",
+  "homepage": "https://github.com/apharanes/ngSearchFilter",
+  "authors": [
+    "Jeanella Klarys Pascual <me@jeekapascual.com>"
+  ],
+  "description": "Angular Directive for searching and filtering a collection.",
+  "main": "ng-search-filter.js",
+  "keywords": [
+    "ng-search-filter",
+    "ngSearchFilter",
+    "search",
+    "filter"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
